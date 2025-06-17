@@ -6,51 +6,40 @@ pipeline {
   }
 
   stages {
-    stage('CheckOut') {
+    stage('Checkout Code') {
       steps {
-        echo 'Checkout the source code from GitHub'
+        echo 'Checking out the source code from GitHub...'
         git 'https://github.com/Narravula070/banking-finance-project-.git'
       }
     }
 
-    stage('Package the Application') {
+    stage('Build with Maven') {
       steps {
-        echo 'Packaging the Application'
+        echo 'Packaging the application using Maven...'
         sh 'mvn clean package'
       }
     }
 
-    stage('Docker Image Creation') {
+    stage('Build Docker Image') {
       steps {
-        echo 'Building Docker Image'
+        echo 'Building the Docker image...'
         sh 'docker build -t kranthi619/finance-me1 .'
       }
     }
 
     stage('Docker Login') {
       steps {
-        echo 'Logging into Docker Hub with hardcoded credentials'
+        echo 'Logging in to Docker Hub with hardcoded credentials...'
         sh '''
           docker login -u kranthi619 -p Kranthi123#
         '''
       }
     }
 
-    stage('Push Image to DockerHub') {
+    stage('Push Docker Image') {
       steps {
-        echo 'Pushing Docker Image to DockerHub'
+        echo 'Pushing the Docker image to Docker Hub...'
         sh 'docker push kranthi619/finance-me1'
-      }
-    }
-
-    stage('Create infrastructure') {
-      steps {
-        dir('prod-server') {
-          sh 'sudo chmod 600 exampl.pem'
-          sh 'terraform init'
-          sh 'terraform validate'
-          sh 'terraform apply --auto-approve'
-        }
       }
     }
   }
