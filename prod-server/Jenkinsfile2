@@ -3,50 +3,53 @@ pipeline {
 
   tools {
     maven 'M2_HOME'
-    }
-  
+  }
+
   stages {
     stage('CheckOut') {
       steps {
         echo 'Checkout the source code from GitHub'
         git 'https://github.com/Narravula070/banking-finance-project-.git'
-            }
+      }
     }
-    
+
     stage('Package the Application') {
       steps {
-        echo " Packaing the Application"
+        echo 'Packaging the Application'
         sh 'mvn clean package'
-            }
+      }
     }
 
-     stage('Docker Image Creation') {
-       steps {
-         sh 'docker build -t kranthi619/finance-me1 .'
-             }
-       } 
-      stage('Docker Login') {
-       steps {
-         withCredentials([usernamePassword(credentialsId: 'Docker-Hub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {         
-         sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
-   }  
-             }
-         }
+    stage('Docker Image Creation') {
+      steps {
+        echo 'Building Docker Image'
+        sh 'docker build -t kranthi619/finance-me1 .'
+      }
+    }
 
-     stage('Push Image to DockerHub') {
-       steps {
-         sh 'docker push kranthi619/insure-me1'
-            }
-        }
-    
+    stage('Docker Login') {
+      steps {
+        echo 'Logging into Docker Hub with hardcoded credentials'
+        sh '''
+          docker login -u kranthi619 -p Kranthi123#
+        '''
+      }
+    }
+
+    stage('Push Image to DockerHub') {
+      steps {
+        echo 'Pushing Docker Image to DockerHub'
+        sh 'docker push kranthi619/finance-me1'
+      }
+    }
+
     stage('Create infrastructure') {
       steps {
         dir('prod-server') {
-        sh 'sudo chmod 600 exampl.pem'
-        sh 'terraform init'
-        sh 'terraform validate'
-        sh 'terraform apply --auto-approve'
-          
+          sh 'sudo chmod 600 exampl.pem'
+          sh 'terraform init'
+          sh 'terraform validate'
+          sh 'terraform apply --auto-approve'
         }
       }
     }
