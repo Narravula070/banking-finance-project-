@@ -5,54 +5,43 @@ pipeline {
     maven 'M2_HOME'
   }
 
-  environment {
-    SONARQUBE_ENV = 'SonarQubeServer'  // Replace with your actual SonarQube server name in Jenkins
-  }
-
   stages {
-    stage('Checkout Code') {
+    stage('Checkout') {
       steps {
-        echo 'Checking out the source code from GitHub...'
         git 'https://github.com/Narravula070/banking-finance-project-.git'
       }
     }
 
-    stage('Build with Maven') {
+    stage('Package') {
       steps {
-        echo 'Packaging the application using Maven...'
         sh 'mvn clean package'
       }
     }
 
     stage('SonarQube Analysis') {
       steps {
-        echo 'Running SonarQube Analysis...'
-        withSonarQubeEnv("${SONARQUBE_ENV}") {
+        withSonarQubeEnv('SonarQubeServer') {
           sh 'mvn sonar:sonar'
         }
       }
     }
 
-    stage('Build Docker Image') {
+    stage('Docker Build') {
       steps {
-        echo 'Building the Docker image...'
         sh 'docker build -t kranthi619/finance-me1 .'
       }
     }
 
-    stage('Docker Login') {
+    stage('Docker Login & Push') {
       steps {
-        echo 'Logging in to Docker Hub with hardcoded credentials...'
-        sh '''
-          docker login -u kranthi619 -p Kranthi123#
-        '''
+        sh 'docker login -u kranthi619 -p Kranthi123#'
+        sh 'docker push kranthi619/finance-me1'
       }
     }
 
-    stage('Push Docker Image') {
+    stage('Upload Artifact to Nexus') {
       steps {
-        echo 'Pushing the Docker image to Docker Hub...'
-        sh 'docker push kranthi619/finance-me1'
+        sh 'mvn deploy -DaltDeploymentRepository=nexus::default::http://15.206.164.179:8081/repository/maven-releases/'
       }
     }
   }
