@@ -5,6 +5,10 @@ pipeline {
     maven 'M2_HOME'
   }
 
+  environment {
+    SONARQUBE_ENV = 'SonarQubeServer'  // Replace with your actual SonarQube server name in Jenkins
+  }
+
   stages {
     stage('Checkout Code') {
       steps {
@@ -17,6 +21,15 @@ pipeline {
       steps {
         echo 'Packaging the application using Maven...'
         sh 'mvn clean package'
+      }
+    }
+
+    stage('SonarQube Analysis') {
+      steps {
+        echo 'Running SonarQube Analysis...'
+        withSonarQubeEnv("${SONARQUBE_ENV}") {
+          sh 'mvn sonar:sonar'
+        }
       }
     }
 
